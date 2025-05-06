@@ -11,3 +11,4 @@ A variant of this is used in NLP that use the merge rules to tokenise text.
 
 A good explanation is available https://www.youtube.com/watch?v=HEikzVL-lZU
 
+The current implementation is rather naive and can be dramatically improved. 
