@@ -1,1 +1,1 @@
-Package { #name : #BytePairEncoder }
+Package { #name : 'BytePairEncoder' }

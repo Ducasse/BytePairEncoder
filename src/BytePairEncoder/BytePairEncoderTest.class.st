@@ -1,10 +1,11 @@
 Class {
-	#name : #BytePairEncoderTest,
-	#superclass : #TestCase,
-	#category : #BytePairEncoder
+	#name : 'BytePairEncoderTest',
+	#superclass : 'TestCase',
+	#category : 'BytePairEncoder',
+	#package : 'BytePairEncoder'
 }
 
-{ #category : #tests }
+{ #category : 'tests' }
 BytePairEncoderTest >> testBuildVocabularyProducesCorrectVocabulary [
 
 	| enc |
@@ -18,7 +19,7 @@ BytePairEncoderTest >> testBuildVocabularyProducesCorrectVocabulary [
 
 ]
 
-{ #category : #'tests - text2' }
+{ #category : 'tests - text2' }
 BytePairEncoderTest >> testBuildVocabularyProducesCorrectVocabularyText2 [
 
 	| enc |
@@ -29,7 +30,7 @@ BytePairEncoderTest >> testBuildVocabularyProducesCorrectVocabularyText2 [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 BytePairEncoderTest >> testComputePairs [
 
 	| enc |
@@ -49,7 +50,7 @@ BytePairEncoderTest >> testComputePairs [
 	
 ]
 
-{ #category : #'tests - text2' }
+{ #category : 'tests - text2' }
 BytePairEncoderTest >> testComputePairsText2 [
 
 	| enc |
@@ -70,7 +71,73 @@ BytePairEncoderTest >> testComputePairsText2 [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests - aaabdaaabac' }
+BytePairEncoderTest >> testComputePairsaaabdaaabac [
+
+	| enc |
+	enc := BytePairEncoder new. 
+	enc prepareWordsFromText: 'aaabdaaabac'.
+	enc computePairs.
+	
+	self 
+		assert: enc pairs sortedCounts 
+		equals: {4->#('a' 'a'). 2->#('a' 'b'). 1->#('b' 'a'). 1->#('d' 'a'). 1->#('b' 'd'). 1->#('c' '_'). 1->#('a' 'c')}
+]
+
+{ #category : 'tests - aaabdaaabac' }
+BytePairEncoderTest >> testComputeVocabularyaaabdaaabac [
+
+	| enc |
+	enc := BytePairEncoder new. 
+	enc prepareWordsFromText: 'aaabdaaabac'.
+	enc computeVocabulary.
+	
+	self 
+		assertCollection: enc vocabulary
+		hasSameElements: #( 'a' 'b' '_' 'c' 'd') asSet
+]
+
+{ #category : 'tests - huggingface tutorial' }
+BytePairEncoderTest >> testHuggingOneMerge [
+
+	| enc |
+	enc := BytePairEncoder new. 
+	enc prepareWordsFromText: self text3.
+	enc computeVocabulary.
+	enc computePairs.
+	enc mergeOneStep.
+	
+	self assert: enc merges first equals: #('u' 'g')->'ug'. 
+	
+	"
+	
+	Vocabulary: [""b"", ""g"", ""h"", ""n"", ""p"", ""s"", ""u"", ""ug""]
+	Corpus: (""h"" ""ug"", 10), (""p"" ""ug"", 5), (""p"" ""u"" ""n"", 12), (""b"" ""u"" ""n"", 4), (""h"" ""ug"" ""s"", 5)
+	
+	"
+]
+
+{ #category : 'tests - huggingface tutorial' }
+BytePairEncoderTest >> testHuggingTwoMerge [
+
+	| enc |
+	enc := BytePairEncoder new. 
+	enc prepareWordsFromText: self text3.
+	enc computeVocabulary.
+	enc computePairs.
+	enc mergeOneStep.
+	enc mergeOneStep.
+	
+	self assert: enc merges second equals: #('n' '_')->'n_'
+	
+	"
+	Vocabulary: [""b"", ""g"", ""h"", ""n"", ""p"", ""s"", ""u"", ""ug""]
+	Corpus: (""h"" ""ug"", 10), (""p"" ""ug"", 5), (""p"" ""u"" ""n"", 12), (""b"" ""u"" ""n"", 4), (""h"" ""ug"" ""s"", 5)
+	
+	"
+]
+
+{ #category : 'tests' }
 BytePairEncoderTest >> testMergeOneStepAddMergeToMergeList [
 
 	| enc |
@@ -83,7 +150,7 @@ BytePairEncoderTest >> testMergeOneStepAddMergeToMergeList [
 	self assert: enc merges first equals: #('e' 's')->'es' 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 BytePairEncoderTest >> testMergeOneStepIncreaseVocabularyAndMerges [
 
 	| enc mergeOldSize |
@@ -101,7 +168,7 @@ BytePairEncoderTest >> testMergeOneStepIncreaseVocabularyAndMerges [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 BytePairEncoderTest >> testMergeOneStepRecomputePairs [
 
 	| enc finestFrequency |
@@ -123,7 +190,7 @@ BytePairEncoderTest >> testMergeOneStepRecomputePairs [
 	self assert: (enc pairOccurrencesOf: {'n' . 'es'}) equals: 9. 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 BytePairEncoderTest >> testMergeOneStepUpdatesCorpus [
 
 	| enc finestFrequency |
@@ -140,7 +207,7 @@ BytePairEncoderTest >> testMergeOneStepUpdatesCorpus [
 	self assert: (enc frequencyOfWord: #('f' 'i' 'n' 'es' 't' '_')) equals: finestFrequency.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 BytePairEncoderTest >> testPrepareWordsFromText [
 
 	| enc |
@@ -153,7 +220,7 @@ BytePairEncoderTest >> testPrepareWordsFromText [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 BytePairEncoderTest >> testTwoMerges [
 
 	| enc |
@@ -168,7 +235,7 @@ BytePairEncoderTest >> testTwoMerges [
 	self assert: enc merges second equals: #('es' 't')->'est'. 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 BytePairEncoderTest >> text [
 	^ 'old old old old old old old 
 older older older
@@ -177,11 +244,27 @@ lowest lowest lowest lowest
 '
 ]
 
-{ #category : #'tests - text2' }
+{ #category : 'tests - text2' }
 BytePairEncoderTest >> text2 [
 	^ '
 low low low low low
 lower lower
 newest newest newest newest newest newest 
 widest widest widest'
+]
+
+{ #category : 'tests - huggingface tutorial' }
+BytePairEncoderTest >> text3 [
+	"from hugging face
+	
+		String streamContents: [ :s |
+		#(('hug' 10)  ('pug' 5)  ('pun' 12) ('bun' 4)  ('hugs' 5))
+			do: [ :pair | pair second 
+					timesRepeat: [ 
+						s nextPutAll: pair first.
+						s space ]].
+			s ]
+	"
+
+	^ 'hug hug hug hug hug hug hug hug hug hug pug pug pug pug pug pun pun pun pun pun pun pun pun pun pun pun pun bun bun bun bun hugs hugs hugs hugs hugs '
 ]

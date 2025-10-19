@@ -58,18 +58,19 @@ Read [https://guillaume-be.github.io/2021-09-16/byte_pair_encoding](https://guil
 
 "
 Class {
-	#name : #BytePairEncoder,
-	#superclass : #Object,
+	#name : 'BytePairEncoder',
+	#superclass : 'Object',
 	#instVars : [
 		'words',
 		'pairs',
 		'vocabulary',
 		'merges'
 	],
-	#category : #BytePairEncoder
+	#category : 'BytePairEncoder',
+	#package : 'BytePairEncoder'
 }
 
-{ #category : #examples }
+{ #category : 'examples' }
 BytePairEncoder class >> example [
 	| enc |
 	enc := self new fromText: ('BytePairEncoder' asPackage selectors asOrderedCollection joinUsing: ' ').
@@ -77,7 +78,7 @@ BytePairEncoder class >> example [
 	^ enc inspect
 ]
 
-{ #category : #examples }
+{ #category : 'examples' }
 BytePairEncoder class >> example2 [
 	| enc |
 	enc := self new fromText: ('BytePairEncoder' asPackage selectors asOrderedCollection joinUsing: ' ').
@@ -85,20 +86,21 @@ BytePairEncoder class >> example2 [
 	^ enc inspect
 ]
 
-{ #category : #merges }
-BytePairEncoder >> addToMergesPair: aCollection mergedInto: aString [ 
-
-	merges add: aCollection -> aString
+{ #category : 'merges' }
+BytePairEncoder >> addToMergesPair: aPair mergedInto: newItem [ 
+	"the pair, aPair has been merged into newItem"
+	
+	merges add: aPair -> newItem
 ]
 
-{ #category : #vocabulary }
+{ #category : 'vocabulary' }
 BytePairEncoder >> addToVocabulary: aString [
 	
 	vocabulary add: aString
 	
 ]
 
-{ #category : #compute }
+{ #category : 'compute' }
 BytePairEncoder >> computePairs [
 	
 	pairs := Bag new.
@@ -106,7 +108,7 @@ BytePairEncoder >> computePairs [
 		self pairForAssociation: association ] 
 ]
 
-{ #category : #vocabulary }
+{ #category : 'vocabulary' }
 BytePairEncoder >> computeVocabulary [
 	
 	"we do not add characters but string because in the merge phase we will have sequences of characters."
@@ -114,12 +116,12 @@ BytePairEncoder >> computeVocabulary [
 	
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 BytePairEncoder >> frequencyOfWord: aString [ 
 	^ words occurrencesOf: aString 
 ]
 
-{ #category : #api }
+{ #category : 'api' }
 BytePairEncoder >> fromText: aString [
 	"Prepare all the information for a text.
 	If you want to add multiple text elements use prepareWordsFromText:..."
@@ -131,20 +133,23 @@ BytePairEncoder >> fromText: aString [
 
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 BytePairEncoder >> initialize [
 
 	super initialize.
 	words := Bag new.
+	"we use a bag so that we can have the occurrences at the world level."
+	
 	vocabulary := Set new.
 	merges := OrderedCollection new.
 	
 ]
 
-{ #category : #merging }
+{ #category : 'merging' }
 BytePairEncoder >> mergeOneStep [
 	
 	| newVocabularyItem pair | 
+	
 	pair := pairs sortedCounts first value.
 	newVocabularyItem := pair first, pair second. 
 	self addToVocabulary: newVocabularyItem.
@@ -154,24 +159,24 @@ BytePairEncoder >> mergeOneStep [
 	
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 BytePairEncoder >> merges [
 
 	^ merges
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 BytePairEncoder >> numberOfPairs [
 	
 	^ pairs keys size
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 BytePairEncoder >> occurrencesOf: aString [ 
 	^ words occurrencesOf: aString 
 ]
 
-{ #category : #compute }
+{ #category : 'compute' }
 BytePairEncoder >> pairForAssociation: anAssociation [ 
 	
 	| word |
@@ -179,15 +184,22 @@ BytePairEncoder >> pairForAssociation: anAssociation [
 	word overlappingPairsWithIndexDo: [ :a :b :index | pairs add:  { a . b } withOccurrences: anAssociation value ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 BytePairEncoder >> pairOccurrencesOf: aString [ 
 	
 	^ pairs occurrencesOf: aString
 ]
 
-{ #category : #compute }
+{ #category : 'accessing' }
+BytePairEncoder >> pairs [
+
+	^ pairs
+]
+
+{ #category : 'compute' }
 BytePairEncoder >> prepareWordsFromText: aText [
 	"Split the text into words. Then build the corpus of words by representing a word as a collection of strings.
+	Use _ to represent end of world for space and others.
 	'low' is represented as #('l' 'o' 'w'). The reason that during the merge of pairs for example 'o' followed by 'w' the words have to be updated to mark this merge. #('l' 'o' 'w') becoming then #('lo' 'w')"
 	
 	| rawWords |
@@ -200,31 +212,33 @@ BytePairEncoder >> prepareWordsFromText: aText [
 							col ])
 ]
 
-{ #category : #vocabulary }
+{ #category : 'vocabulary' }
 BytePairEncoder >> uniqueWords [
 
 	^ words keys
 ]
 
-{ #category : #merging }
+{ #category : 'merging' }
 BytePairEncoder >> updateCorpusFrom: pair to: newVocabularyItem [
 
 	| bag |
 	bag := Bag new.
 	words keys copy do: 
 		[ :word |
-			bag add: (word copyReplaceAll: pair with: {newVocabularyItem}) withOccurrences: (words occurrencesOf: word)
+			bag 
+				add: (word copyReplaceAll: pair with: {newVocabularyItem}) 
+				withOccurrences: (words occurrencesOf: word)
 		].
 	words := bag
 ]
 
-{ #category : #vocabulary }
+{ #category : 'vocabulary' }
 BytePairEncoder >> vocabulary [
 
 	^ vocabulary
 ]
 
-{ #category : #vocabulary }
+{ #category : 'vocabulary' }
 BytePairEncoder >> vocabularySize [
 
 	^ vocabulary size
