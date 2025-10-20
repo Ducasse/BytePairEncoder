@@ -189,6 +189,19 @@ BytePairEncoderTest >> testMergeOneStepAddMergeToMergeListTintin [
 
 ]
 
+{ #category : 'tests - aaabdaaabac' }
+BytePairEncoderTest >> testMergeOneStepAddMergeToMergeListaaabdaaabac [
+
+	| enc |
+	enc := BytePairEncoder new. 
+	enc prepareWordsFromText: 'aaabdaaabac'.
+	enc computeVocabulary.
+	enc computePairs.
+	self assert: enc merges isEmpty.
+	enc mergeOneStep.
+	self assert: enc merges first  equals: #('a' 'a')->'aa'
+]
+
 { #category : 'tests' }
 BytePairEncoderTest >> testMergeOneStepIncreaseVocabularyAndMerges [
 
@@ -244,6 +257,35 @@ BytePairEncoderTest >> testMergeOneStepUpdatesCorpus [
 	self assert: (enc uniqueWords includes: #('l' 'o' 'w' 'es' 't' '_') asOrderedCollection).
 	self assert: (enc uniqueWords includes: #('f' 'i' 'n' 'es' 't' '_') asOrderedCollection). 
 	self assert: (enc frequencyOfWord: #('f' 'i' 'n' 'es' 't' '_')) equals: finestFrequency.
+]
+
+{ #category : 'tests - aaabdaaabac' }
+BytePairEncoderTest >> testMergeThreeStepAddMergeToMergeListaaabdaaabac [
+
+	| enc |
+	enc := BytePairEncoder new. 
+	enc prepareWordsFromText: 'aaabdaaabac'.
+	enc computeVocabulary.
+	enc computePairs.
+	self assert: enc merges isEmpty.
+	enc mergeOneStep.
+	enc mergeOneStep.
+	enc mergeOneStep.
+	self assert: enc merges third equals: #('aaa' 'b') -> 'aaab'
+]
+
+{ #category : 'tests - aaabdaaabac' }
+BytePairEncoderTest >> testMergeTwoStepAddMergeToMergeListaaabdaaabac [
+
+	| enc |
+	enc := BytePairEncoder new. 
+	enc prepareWordsFromText: 'aaabdaaabac'.
+	enc computeVocabulary.
+	enc computePairs.
+	self assert: enc merges isEmpty.
+	enc mergeOneStep.
+	enc mergeOneStep.
+	self assert: enc merges second equals:  #('aa' 'a')->'aaa'
 ]
 
 { #category : 'tests' }

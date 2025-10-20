@@ -105,13 +105,17 @@ BytePairEncoder >> computePairs [
 	
 	pairs := Bag new.
 	words associationsDo: [ :association | 
-		self pairForAssociation: association ] 
+		| word |
+		word := association key.
+		word overlappingPairsWithIndexDo: [ :a :b :index | 
+		   pairs add:  { a . b } withOccurrences: association value ]
+		 ] 
 ]
 
 { #category : 'vocabulary' }
 BytePairEncoder >> computeVocabulary [
-	
 	"we do not add characters but string because in the merge phase we will have sequences of characters."
+	
 	words do: [ :each | each do: [ :aChar | self addToVocabulary: aChar asString ]].
 	
 ]
@@ -137,19 +141,17 @@ BytePairEncoder >> fromText: aString [
 BytePairEncoder >> initialize [
 
 	super initialize.
-	words := Bag new.
-	"we use a bag so that we can have the occurrences at the world level."
-	
+	words := Bag new. 
+	"We use a bag so that we can have the occurrences at the world level."
+
 	vocabulary := Set new.
-	merges := OrderedCollection new.
-	
+	merges := OrderedCollection new
 ]
 
-{ #category : 'merging' }
+{ #category : 'merges' }
 BytePairEncoder >> mergeOneStep [
 	
-	| newVocabularyItem pair | 
-	
+	| newVocabularyItem pair |
 	pair := pairs sortedCounts first value.
 	newVocabularyItem := pair first, pair second. 
 	self addToVocabulary: newVocabularyItem.
@@ -176,21 +178,13 @@ BytePairEncoder >> occurrencesOf: aString [
 	^ words occurrencesOf: aString 
 ]
 
-{ #category : 'compute' }
-BytePairEncoder >> pairForAssociation: anAssociation [ 
-	
-	| word |
-	word := anAssociation key.
-	word overlappingPairsWithIndexDo: [ :a :b :index | pairs add:  { a . b } withOccurrences: anAssociation value ]
-]
-
-{ #category : 'accessing' }
+{ #category : 'only for tests' }
 BytePairEncoder >> pairOccurrencesOf: aString [ 
 	
 	^ pairs occurrencesOf: aString
 ]
 
-{ #category : 'accessing' }
+{ #category : 'only for tests' }
 BytePairEncoder >> pairs [
 
 	^ pairs
@@ -201,15 +195,18 @@ BytePairEncoder >> prepareWordsFromText: aText [
 	"Split the text into words. Then build the corpus of words by representing a word as a collection of strings.
 	Use _ to represent end of world for space and others.
 	'low' is represented as #('l' 'o' 'w'). The reason that during the merge of pairs for example 'o' followed by 'w' the words have to be updated to mark this merge. #('l' 'o' 'w') becoming then #('lo' 'w')"
-	
+
 	| rawWords |
-	rawWords := (aText substrings: {Character space . Character cr. Character tab}).
-	words addAll: (rawWords collect: [ :each | 
-							| col |
-							col := OrderedCollection new: each size + 1.
-							each do: [ :aChar | col add: aChar asString ].
-							col add: '_'.
-							col ])
+	rawWords := aText substrings: {
+			            Character space.
+			            Character cr.
+			            Character tab . $. . $? .$! .$: . $;}.
+	words addAll: (rawWords collect: [ :each |
+				 | col |
+				 col := OrderedCollection new: each size + 1.
+				 each do: [ :aChar | col add: aChar asString ].
+				 col add: '_'.
+				 col ])
 ]
 
 { #category : 'vocabulary' }
@@ -218,7 +215,7 @@ BytePairEncoder >> uniqueWords [
 	^ words keys
 ]
 
-{ #category : 'merging' }
+{ #category : 'merges' }
 BytePairEncoder >> updateCorpusFrom: pair to: newVocabularyItem [
 
 	| bag |
