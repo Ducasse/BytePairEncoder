@@ -71,6 +71,18 @@ BytePairEncoderTest >> testComputePairsText2 [
 	
 ]
 
+{ #category : 'tests - tintin' }
+BytePairEncoderTest >> testComputePairsTintin [
+
+	| enc |
+	enc := BytePairEncoder new.
+	enc prepareWordsFromText: self textTintin.
+	enc computePairs.
+
+	self assert: enc pairs sortedCounts 
+		equals: {8->#('i' 'n'). 7->#('n' 't'). 4->#('t' 'i'). 4->#('n' '_'). 4->#('e' 's'). 3->#('n' 'a'). 3->#('T' 'i'). 3->#('.' '_'). 3->#('s' '_'). 3->#('t' '_'). 3->#('d' 'e'). 2->#('e' '_'). 2->#('t' 'e'). 2->#('o' 'u'). 2->#('o' 'n'). 2->#('r' 'n'). 2->#('s' 't'). 2->#('a' 'l'). 2->#('r' 'e'). 2->#('u' 'r'). 1->#('p' 'i'). 1->#('e' 'r'). 1->#('i' 's'). 1->#('s' '.'). 1->#('i' 'l'). 1->#('a' 'v'). 1->#('e' '.'). 1->#('e' 'p'). 1->#('p' 'a'). 1->#('o' 'm'). 1->#('i' 'd'). 1->#('a' 't'). 1->#('l' 'e'). 1->#('t' 'u'). 1->#('u' 'n'). 1->#('e' 'n'). 1->#('m' '.'). 1->#('e' 't'). 1->#('a' '_'). 1->#('a' 's'). 1->#('i' 'o'). 1->#('j' 'o'). 1->#('l' 'i'). 1->#('u' '_'). 1->#('m' 'i'). 1->#('l' 'o'). 1->#('t' 'r'). 1->#('n' ''''). 1->#('v' 'e'). 1->#('n' 'o'). 1->#('''' 'a')} 
+]
+
 { #category : 'tests - aaabdaaabac' }
 BytePairEncoderTest >> testComputePairsaaabdaaabac [
 
@@ -82,6 +94,19 @@ BytePairEncoderTest >> testComputePairsaaabdaaabac [
 	self 
 		assert: enc pairs sortedCounts 
 		equals: {4->#('a' 'a'). 2->#('a' 'b'). 1->#('b' 'a'). 1->#('d' 'a'). 1->#('b' 'd'). 1->#('c' '_'). 1->#('a' 'c')}
+]
+
+{ #category : 'tests - tintin' }
+BytePairEncoderTest >> testComputeVocabularyTintin [
+
+	| enc |
+	enc := BytePairEncoder new.
+	enc prepareWordsFromText: self textTintin.
+	enc computeVocabulary.
+
+	self 
+		assertCollection: enc vocabulary 
+		equals: #('s' 'l' 'e' 'j' 'v' 'o' '.' 'a' '''' 't' 'm' '_' 'r' 'd' 'p' 'i' 'T' 'u' 'n') asSet
 ]
 
 { #category : 'tests - aaabdaaabac' }
@@ -148,6 +173,20 @@ BytePairEncoderTest >> testMergeOneStepAddMergeToMergeList [
 	self assert: enc merges isEmpty.
 	enc mergeOneStep.
 	self assert: enc merges first equals: #('e' 's')->'es' 
+]
+
+{ #category : 'tests - tintin' }
+BytePairEncoderTest >> testMergeOneStepAddMergeToMergeListTintin [
+
+	| enc |
+	enc := BytePairEncoder new.
+	enc prepareWordsFromText: self textTintin.
+	enc computeVocabulary.
+	enc computePairs.
+	self assert: enc merges isEmpty.
+	enc mergeOneStep.
+	self assert: enc merges first equals: #('i' 'n')->'in'.
+
 ]
 
 { #category : 'tests' }
@@ -267,4 +306,11 @@ BytePairEncoderTest >> text3 [
 	"
 
 	^ 'hug hug hug hug hug hug hug hug hug hug pug pug pug pug pug pun pun pun pun pun pun pun pun pun pun pun pun bun bun bun bun hugs hugs hugs hugs hugs '
+]
+
+{ #category : 'tests - tintin' }
+BytePairEncoderTest >> textTintin [
+
+	^ 'Tintin est un journaliste intrepide. Tintin et milou ont des aventures internationales.
+	Tintin n''a pas de nom.'
 ]

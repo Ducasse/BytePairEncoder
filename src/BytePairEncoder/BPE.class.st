@@ -3,7 +3,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'vocabulary',
-		'merges'
+		'merges',
+		'corpus'
 	],
 	#category : 'BytePairEncoder',
 	#package : 'BytePairEncoder'
@@ -45,7 +46,7 @@ BPE >> pairCounts [
    | counter |
    counter := Dictionary new.
 
-   vocabulary do: [ :word |
+   corpus do: [ :word |
        word size < 2 ifTrue: [ ^ counter ]. "no pairs"
        1 to: word size - 1 do: [ :i |
            | pair |
@@ -61,14 +62,14 @@ BPE >> tokenize: aWord [
 	"Turn word into elementary elements that will be added to the vocabulary."
 	"Convert as array since collect will try to create a string."
 	
-   ^ aWord asArray collect: [ :c | c asString ]
+   ^ aWord asSet collect: [ :c | c asString ]
 ]
 
 { #category : 'parsing' }
 BPE >> trainOnCorpus: words mergeCount: mergeCount [
    "words is an array of strings (e.g. #('low' 'lower' ...))."
 
-   vocabulary := OrderedCollection new.
+   vocabulary := Set new.
    words do: [ :w | vocabulary add: (self tokenize: w) ].
 
    1 to: mergeCount do: [ :i |
@@ -99,4 +100,9 @@ BPE >> trainOnCorpus: words mergeCount: mergeCount [
                        tokens add: (word at: i).
                        i := i + 1 ] ].
            tokens asArray ] ].   "keep as Array for next iteration"
+]
+
+{ #category : 'accessing' }
+BPE >> vocabulary [
+	^ vocabulary
 ]

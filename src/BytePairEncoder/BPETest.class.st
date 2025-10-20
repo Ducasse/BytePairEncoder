@@ -7,7 +7,9 @@ Class {
 
 { #category : 'tests' }
 BPETest >> testTokenize [ 
-
-
-	BPE new tokenize: 'lulu'
+	
+	| bpe tokens |
+	bpe := BPE new.
+	tokens := bpe tokenize: 'lulu'.
+	self assert: tokens equals: #('l' 'u') asSet
 ]
