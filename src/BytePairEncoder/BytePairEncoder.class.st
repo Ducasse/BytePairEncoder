@@ -9,20 +9,21 @@ Suppose we have data aaabdaaabac which needs to be encoded (compressed). The byt
 A variant of this is used in NLP that use the merge rules to tokenise text.
 
 
-
 ### Basic steps
+The algorithm is the following: 
 
-- Step 0. Initialize.
 - Step 1. Represent each word in the corpus as a combination of the characters terminating with a end marker _. We keep a bag to just have to operate on a single representative e.g. `{'low': 5}` to say that `'low'` is present 5 times in the corpus.
 - Step 2. Iteratively count adjacent character pairs in all words of the corpus.
-- Step 3. Merge every occurrence of the most frequent pair, add the new character n-gram to the vocabulary. Update all the words of the corpus to reflect the fact that the new frequent pair got added to the vocabulary. It means that once we udpate the words we just have torebuild the adjency pairs.
-- Step 4. Repeat step 3 until the desired number of merge operations are completed or the desired vocabulary size is achieved (which is a hyperparameter).
+- Step 3. Identify the most frequent pair. If several pairs have the same frequency pick one. 
+- Step 4. Replace the most frequent pair with a new n-gram and add this to the ordered merge list. Add the new character n-gram to the vocabulary. Update all the words of the corpus to reflect the fact that the new frequent pair got added to the vocabulary. It means that once we udpate the words we just have to rebuild the adjency pairs.
+- Step 4. Repeat step 3 until the desired number of merge operations are completed or the desired vocabulary size is achieved.
 
 Once these steps are performed, we have an extended vocabulary and a list of merges.
-Given a new word look into the merge list for the ones that match and apply them one by one in order and we get the new word tokenised.
+Given a new word look into the merge list in order for the ones that match and apply them one by one in order and we get the new word tokenised.
 
-#### Note
-We cannot simply update the pairs because the pairs represent a local information and just updating them is not possible
+
+### Notes
+We cannot simply update the pairs because the pairs represent a local information and just updating them is not possible.
 
 Imagine that we have 
 
@@ -148,6 +149,14 @@ BytePairEncoder >> initialize [
 	merges := OrderedCollection new
 ]
 
+{ #category : 'printing' }
+BytePairEncoder >> inspection: aBuilder [
+
+	<inspectorPresentationOrder: -1 title: 'Summary'>
+
+	^ (aBuilder instantiate: SpTextPresenter) text: self printString
+]
+
 { #category : 'merges' }
 BytePairEncoder >> mergeOneStep [
 	
@@ -207,6 +216,28 @@ BytePairEncoder >> prepareWordsFromText: aText [
 				 each do: [ :aChar | col add: aChar asString ].
 				 col add: '_'.
 				 col ])
+]
+
+{ #category : 'printing' }
+BytePairEncoder >> printOn: aStream [
+
+	aStream 
+		nextPutAll: 'voc  ';
+		tab.
+	vocabulary do: [ :each | aStream print: each ] separatedBy: [ aStream space ]. 
+		
+	aStream cr.
+		aStream 
+		nextPutAll: 'corpus  '; cr.
+	words keysAndValuesDo: [ :k :v | aStream tab ; print: k asArray; space ; print: v ; cr ].
+
+	aStream nextPutAll: 'pairs  '; cr.
+	pairs keysAndValuesDo: [ :k :v | aStream tab;  print: k; space ; print: v ; cr ].
+	aStream 
+		nextPutAll: 'merges ';
+		tab.
+	merges do: [ :each | aStream print: each ] separatedBy: [ aStream space ]. 
+	aStream cr.
 ]
 
 { #category : 'vocabulary' }
