@@ -125,6 +125,45 @@ BytePairEncoderTest >> testComputeVocabularyaaabdaaabac [
 		hasSameElements: #( 'a' 'b' '_' 'c' 'd') asSet
 ]
 
+{ #category : 'tests - text2' }
+BytePairEncoderTest >> testEncode [
+
+	| b| 
+	b := BytePairEncoder new.
+	b fromText: 'fred fed ted bread and ted fed fred bread'.
+	b untilAllProcessed.
+	self 
+		assert: (b encode: 'ted eats bread') asArray
+		equals: #('ted_' 'ea' 't' 's' '_' 'bread_')	
+]
+
+{ #category : 'tests - text2' }
+BytePairEncoderTest >> testEncodeForeignSymbols [
+
+	| b  |
+	b := BytePairEncoder new.
+	b fromText: self text2.
+	self assert: b pairs class equals: Bag.
+	b untilAllProcessed.
+	self assert: b merges size equals: 14.
+	self assert: (b encode: 'y k z') asArray equals: #('y' '_' 'k' '_' 'z' '_')
+
+	
+]
+
+{ #category : 'tests - text2' }
+BytePairEncoderTest >> testEncodeWithForeign [
+
+	| b| 
+	b := BytePairEncoder new.
+	b fromText: 'fred fed ted bread and ted fed fred bread'.
+	b untilAllProcessed.
+	self 
+		assert: (b encode: 'ted eats bread') asArray
+		equals: #('ted_' 'ea' 't' 's' '_' 'bread_')	.
+	self assert: (b encode: 'y k z') asArray equals: #('y' '_' 'k' '_' 'z' '_')
+]
+
 { #category : 'tests - huggingface tutorial' }
 BytePairEncoderTest >> testHuggingOneMerge [
 

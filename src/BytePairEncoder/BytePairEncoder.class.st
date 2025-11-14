@@ -121,6 +121,42 @@ BytePairEncoder >> computeVocabulary [
 	
 ]
 
+{ #category : 'api' }
+BytePairEncoder >> encode: aString [
+	"this encoding does not considering overlapping merges. 
+	
+	if we have 
+		a,b -> 1
+		b,c -> 2	
+	and a string
+		abc 
+			it will produce 
+				1c
+			and not 12
+	"
+	| wrds |
+	wrds := (self textToWords: aString) flatCollect: [ :each | each  ].
+	wrds := wrds asOrderedCollection.
+	
+	merges do: [ :aMerge |
+			| key first second rempl i |
+			key := aMerge key.
+			first := key first.
+			second := key second.
+			rempl := aMerge value. 
+			i := 1.
+			[ i < wrds size ] whileTrue: [  
+				(((wrds at: i) = first) 
+					and: [ (wrds at: i + 1) = second ])
+					ifTrue: [ wrds removeAt: i; at: i put: rempl.
+						i := i + 1].
+						i := i + 1 ].
+			].
+	^ wrds
+	
+
+]
+
 { #category : 'accessing' }
 BytePairEncoder >> frequencyOfWord: aString [ 
 	^ words occurrencesOf: aString 
@@ -199,30 +235,29 @@ BytePairEncoder >> pairs [
 	^ pairs
 ]
 
+{ #category : 'api' }
+BytePairEncoder >> prepareWith: aText andEncode: aString [
+
+	self fromText: aText.
+	self untilAllProcessed.
+	 
+	
+]
+
 { #category : 'compute' }
 BytePairEncoder >> prepareWordsFromText: aText [
 	"Split the text into words. Then build the corpus of words by representing a word as a collection of strings.
 	Use _ to represent end of world for space and others.
 	'low' is represented as #('l' 'o' 'w'). The reason that during the merge of pairs for example 'o' followed by 'w' the words have to be updated to mark this merge. #('l' 'o' 'w') becoming then #('lo' 'w')"
 
-	| rawWords |
-	rawWords := aText substrings: {
-			            Character space.
-			            Character cr.
-			            Character tab . $. . $? .$! .$: . $;}.
-	words addAll: (rawWords collect: [ :each |
-				 | col |
-				 col := OrderedCollection new: each size + 1.
-				 each do: [ :aChar | col add: aChar asString ].
-				 col add: '_'.
-				 col ])
+	words addAll: (self textToWords: aText)
 ]
 
 { #category : 'printing' }
 BytePairEncoder >> printOn: aStream [
 
 	aStream 
-		nextPutAll: 'voc  ';
+		nextPutAll: 'voc  '; cr;
 		tab.
 	vocabulary do: [ :each | aStream print: each ] separatedBy: [ aStream space ]. 
 		
@@ -234,16 +269,41 @@ BytePairEncoder >> printOn: aStream [
 	aStream nextPutAll: 'pairs  '; cr.
 	pairs keysAndValuesDo: [ :k :v | aStream tab;  print: k; space ; print: v ; cr ].
 	aStream 
-		nextPutAll: 'merges ';
-		tab.
-	merges do: [ :each | aStream print: each ] separatedBy: [ aStream space ]. 
+		nextPutAll: 'merges '; cr.
+	merges do: [ :each | aStream tab ; print: each ] separatedBy: [ aStream cr ]. 
 	aStream cr.
+]
+
+{ #category : 'compute' }
+BytePairEncoder >> textToWords: aText [
+	"Split the text into words. Then turn a word as a collection of strings."
+
+	| rawWords |
+	rawWords := aText substrings: {
+			            Character space.
+			            Character cr.
+			            Character tab . $. . $? .$! .$: . $;}.
+	^ (rawWords collect: [ :each |
+				 | col |
+				 col := OrderedCollection new: each size + 1.
+				 each do: [ :aChar | col add: aChar asString ].
+				 col add: '_'.
+				 col ])
 ]
 
 { #category : 'vocabulary' }
 BytePairEncoder >> uniqueWords [
 
 	^ words keys
+]
+
+{ #category : 'api' }
+BytePairEncoder >> untilAllProcessed [
+	
+	[ ( pairs sortedCounts first key > 1 ) and: [ pairs size > 2 ] ] 
+		whileTrue: [ self mergeOneStep ] 
+	
+
 ]
 
 { #category : 'merges' }
