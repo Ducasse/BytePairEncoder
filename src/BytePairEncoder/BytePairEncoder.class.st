@@ -331,3 +331,9 @@ BytePairEncoder >> vocabularySize [
 
 	^ vocabulary size
 ]
+
+{ #category : 'vocabulary' }
+BytePairEncoder >> words [ 
+
+	^ words
+]
