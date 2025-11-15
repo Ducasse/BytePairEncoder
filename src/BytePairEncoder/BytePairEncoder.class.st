@@ -94,7 +94,7 @@ BytePairEncoder >> addToMergesPair: aPair mergedInto: newItem [
 	merges add: aPair -> newItem
 ]
 
-{ #category : 'vocabulary' }
+{ #category : 'compute' }
 BytePairEncoder >> addToVocabulary: aString [
 	
 	vocabulary add: aString
@@ -113,7 +113,7 @@ BytePairEncoder >> computePairs [
 		 ] 
 ]
 
-{ #category : 'vocabulary' }
+{ #category : 'compute' }
 BytePairEncoder >> computeVocabulary [
 	"we do not add characters but string because in the merge phase we will have sequences of characters."
 	
@@ -157,11 +157,6 @@ BytePairEncoder >> encode: aString [
 
 ]
 
-{ #category : 'accessing' }
-BytePairEncoder >> frequencyOfWord: aString [ 
-	^ words occurrencesOf: aString 
-]
-
 { #category : 'api' }
 BytePairEncoder >> fromText: aString [
 	"Prepare all the information for a text.
@@ -179,7 +174,7 @@ BytePairEncoder >> initialize [
 
 	super initialize.
 	words := Bag new. 
-	"We use a bag so that we can have the occurrences at the world level."
+	"This way we factor computation."
 
 	vocabulary := Set new.
 	merges := OrderedCollection new
@@ -212,13 +207,13 @@ BytePairEncoder >> merges [
 	^ merges
 ]
 
-{ #category : 'accessing' }
+{ #category : 'only for tests' }
 BytePairEncoder >> numberOfPairs [
 	
 	^ pairs keys size
 ]
 
-{ #category : 'accessing' }
+{ #category : 'only for tests' }
 BytePairEncoder >> occurrencesOf: aString [ 
 	^ words occurrencesOf: aString 
 ]
@@ -240,6 +235,7 @@ BytePairEncoder >> prepareWith: aText andEncode: aString [
 
 	self fromText: aText.
 	self untilAllProcessed.
+	^ self encode: aString
 	 
 	
 ]
@@ -291,7 +287,7 @@ BytePairEncoder >> textToWords: aText [
 				 col ])
 ]
 
-{ #category : 'vocabulary' }
+{ #category : 'only for tests' }
 BytePairEncoder >> uniqueWords [
 
 	^ words keys
@@ -320,19 +316,19 @@ BytePairEncoder >> updateCorpusFrom: pair to: newVocabularyItem [
 	words := bag
 ]
 
-{ #category : 'vocabulary' }
+{ #category : 'accessing' }
 BytePairEncoder >> vocabulary [
 
 	^ vocabulary
 ]
 
-{ #category : 'vocabulary' }
+{ #category : 'only for tests' }
 BytePairEncoder >> vocabularySize [
 
 	^ vocabulary size
 ]
 
-{ #category : 'vocabulary' }
+{ #category : 'accessing' }
 BytePairEncoder >> words [ 
 
 	^ words
